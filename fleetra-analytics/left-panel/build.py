@@ -43,8 +43,8 @@ def text(x, y, s, size, color, weight=400, anchor='start', ls=0, cls='', op=1):
             f'text-anchor="{anchor}" letter-spacing="{ls}" opacity="{op}">{s}</text>')
 
 out = []
-out.append('<defs><filter id="hubBlur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="18"/></filter>'
-           '<filter id="hubBlurWide" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="40"/></filter></defs>')
+out.append('<defs><filter id="hubBlur" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="26"/></filter>'
+           '<filter id="hubBlurWide" x="-120%" y="-120%" width="340%" height="340%"><feGaussianBlur stdDeviation="60"/></filter></defs>')
 out.append(f'<rect width="{W}" height="{H}" fill="{BG}"/>')
 
 CY = 447
@@ -87,8 +87,8 @@ out.append(source_card('src-tracking', *SRC2, CYAN, 'Tracking',
 HX0, HX1, HY0, HY1 = 503, 679, CY - 88, CY + 88
 out.append(f'<g id="hub" class="hub" data-phase="2">')
 # soft light *behind* the block (diffuse, no hard shadow); the opaque card hides it inside, so it only spills around the edges
-out.append(f'<g id="hub-halo" opacity=".55"><rect x="{HX0+6}" y="{HY0+6}" width="{HX1-HX0-12}" height="{HY1-HY0-12}" rx="26" fill="{ORANGE}" fill-opacity=".55" filter="url(#hubBlur)"/>'
-           f'<rect x="{HX0-10}" y="{HY0-10}" width="{HX1-HX0+20}" height="{HY1-HY0+20}" rx="34" fill="#ff8a4c" fill-opacity=".10" filter="url(#hubBlurWide)"/></g>')
+out.append(f'<g id="hub-halo" opacity=".55"><rect x="{HX0+6}" y="{HY0+6}" width="{HX1-HX0-12}" height="{HY1-HY0-12}" rx="26" fill="{ORANGE}" fill-opacity=".45" filter="url(#hubBlur)"/>'
+           f'<rect x="{HX0-10}" y="{HY0-10}" width="{HX1-HX0+20}" height="{HY1-HY0+20}" rx="34" fill="#ff8a4c" fill-opacity=".12" filter="url(#hubBlurWide)"/></g>')
 # the hub IS the Fleetra logo tile (it fills the whole square), with a fine light edge on top
 LOGO = HX1 - HX0
 out.append(f'<image id="hub-logo" href="data:image/png;base64,@@LOGO@@" x="{HX0}" y="{HY0}" width="{LOGO}" height="{LOGO}"/>')

@@ -1,7 +1,11 @@
-/* Fleetra Analytics — 8 s seamless loop (data-flow scene only, no login form).
-   Lines never move: only small data packets travel along them.
-   0.0–0.5 calm · 0.5–3.4 Recouvrement + Tracking → logo · 2.0–4.8 centralise · croise · transforme
-   4.1–7.0 logo → Finance / Performance / Opérations / Décision · 7.0–8.0 back to calm */
+/* Fleetra Analytics — 8 s seamless loop (data-flow scene only).
+   Fixed camera, fixed lines: only data packets and micro-interactions move.
+   0.0–1.0  calm
+   1.0–2.5  packets leave Recouvrement (orange) and Tracking (blue)
+   2.5–4.0  both flows reach the hub and converge to its centre
+   3.5–4.8  orange + blue packets gather and mix around the centre, the hub reacts (centralise · croise · transforme)
+   4.8–6.9  new packets leave the centre: Finance → Performance → Opérations → Décision
+   6.5–8.0  everything settles back to the calm state (frame 8 s == frame 0) */
 gsap.registerPlugin(MotionPathPlugin);
 const NS = "http://www.w3.org/2000/svg";
 const ORANGE = "#ff5a1f", CYAN = "#38bdf8", MUTED = "#8b95a1", TXT = "#f4f6f8";
@@ -21,136 +25,147 @@ const el = (tag, attrs, parent) => {
   if (parent) parent.appendChild(e);
   return e;
 };
-
-/* ---------- geometry of the hub ---------- */
-const frame = $("#hub-frame");
-const logo = $("#hub image");
-const fx = +frame.getAttribute("x"), fy = +frame.getAttribute("y"), fw = +frame.getAttribute("width"), fh = +frame.getAttribute("height"), frx = +frame.getAttribute("rx");
-const lx = +logo.getAttribute("x"), ly = +logo.getAttribute("y"), ls = +logo.getAttribute("width");
-const lcx = lx + ls / 2, lcy = ly + ls / 2;
-
-/* invisible internal routes: input ports → logo, logo → output ports (no new visible line) */
-const internal = el("g", { id: "internal-routes", fill: "none", stroke: "none" }, svg);
-const pathEnd = (id) => { const p = document.getElementById(id); return p.getPointAtLength(p.getTotalLength()); };
 const pathStart = (id) => document.getElementById(id).getPointAtLength(0);
+const pathEnd = (id) => { const p = document.getElementById(id); return p.getPointAtLength(p.getTotalLength()); };
+
+/* ---------- hub geometry ---------- */
+const frame = $("#hub-frame");
+const logo = $("#hub-logo");
+const halo = $("#hub-halo");
+const lx = +logo.getAttribute("x"), ly = +logo.getAttribute("y"), ls = +logo.getAttribute("width");
+const C = { x: lx + ls / 2, y: ly + ls / 2 };
+gsap.set(logo, { filter: "brightness(1)" });   // explicit start value so the filter interpolates cleanly           // centre of the Fleetra mark
+
+/* invisible internal routes (no new visible line): port → centre, centre → port */
+const internal = el("g", { id: "internal-routes", fill: "none", stroke: "none" }, svg);
 function route(id, a, b, bend) {
-  const d = `M${a.x},${a.y} C${a.x + bend},${a.y} ${b.x - bend},${b.y} ${b.x},${b.y}`;
-  el("path", { id, d }, internal);
+  el("path", { id, d: `M${a.x},${a.y} C${a.x + bend},${a.y} ${b.x - bend},${b.y} ${b.x},${b.y}` }, internal);
   return "#" + id;
 }
-const logoIn = { x: lx + 22, y: lcy }, logoOut = { x: lx + ls - 22, y: lcy };
 const IN_ROUTE = {
-  "flow-in-recouvrement": route("r-in-recouvrement", pathEnd("flow-in-recouvrement"), logoIn, 22),
-  "flow-in-tracking": route("r-in-tracking", pathEnd("flow-in-tracking"), logoIn, 22),
+  "flow-in-recouvrement": route("r-in-rec", pathEnd("flow-in-recouvrement"), C, 40),
+  "flow-in-tracking": route("r-in-trk", pathEnd("flow-in-tracking"), C, 40),
 };
 const OUT_ROUTE = {};
 ["flow-out-finance", "flow-out-performance", "flow-out-operations", "flow-out-decision"].forEach((f) => {
-  OUT_ROUTE[f] = route("r-" + f, logoOut, pathStart(f), 22);
+  OUT_ROUTE[f] = route("r-" + f, C, pathStart(f), 40);
 });
 
-/* ---------- very soft glows (hidden at rest) ---------- */
-const defs = el("defs", {}, svg);
-const blur = el("filter", { id: "softGlow", x: "-60%", y: "-60%", width: "220%", height: "220%" }, defs);
-el("feGaussianBlur", { stdDeviation: "7" }, blur);
-const hub = $("#hub");
-const halo = $("#hub-halo");
-const logoGlow = el("rect", { x: lx + 4, y: ly + 4, width: ls - 8, height: ls - 8, rx: 14, fill: ORANGE, filter: "url(#softGlow)", opacity: 0 });
-hub.insertBefore(logoGlow, logo);
-
-/* ---------- data packets ---------- */
-function makePacket(col, r) {
+/* ---------- data packet: coloured halo + coloured ring + white core (readable on dark and on the orange tile) ---------- */
+function makePacket(col) {
   const g = el("g", { opacity: 0 }, $("#packets"));
-  g.innerHTML = `<circle r="${r * 2.3}" fill="${col}" opacity=".24"/><circle r="${r}" fill="${col}"/><circle r="${(r * 0.38).toFixed(2)}" fill="#ffffff" opacity=".85"/>`;
+  g.innerHTML = `<circle r="7.5" fill="${col}" opacity=".2"/><circle r="3.6" fill="${col}"/><circle r="1.6" fill="#ffffff" opacity=".95"/>`;
   return g;
 }
-const mp = (path) => ({ path, align: path, alignOrigin: [0.5, 0.5] });
+const mp = (path, start = 0, end = 1) => ({ path, align: path, alignOrigin: [0.5, 0.5], start, end });
 
-/* source → hub port → into the logo (absorbed) */
-function inbound(flow, t0, dur) {
-  const g = makePacket(colorOf(flow), 3.2);
+/* ---------- inbound: source → hub port → centre → short swirl → absorbed ---------- */
+const SWIRL_R = 15;
+const SWIRL_END = 4.45;                 // all packets are absorbed together
+const swirlCount = {};   // orange at 0/120/240°, blue at 60/180/300° → the two families interleave
+function inbound(flow, t0, dur, ease) {
+  const g = makePacket(colorOf(flow));
   const p0 = pathStart(flow);
-  gsap.set(g, { x: p0.x, y: p0.y });
-  tl.to(g, { opacity: 1, duration: 0.25, ease: "sine.out" }, t0);
-  tl.to(g, { motionPath: mp("#" + flow), duration: dur, ease: "power1.in" }, t0);
-  const tIn = t0 + dur;
-  tl.to(g, { motionPath: mp(IN_ROUTE[flow]), scale: 0.75, duration: 0.55, ease: "power1.out" }, tIn);
-  tl.to(g, { opacity: 0, duration: 0.25, ease: "sine.in" }, tIn + 0.3);
-  return tIn;
-}
-/* out of the logo → hub port → analysis card */
-function outbound(flow, t0, dur) {
-  const g = makePacket(colorOf(flow), 3.2);
-  gsap.set(g, { x: logoOut.x, y: logoOut.y, scale: 0.75 });
-  tl.to(g, { opacity: 1, duration: 0.25, ease: "sine.out" }, t0);
-  tl.to(g, { motionPath: mp(OUT_ROUTE[flow]), scale: 1, duration: 0.45, ease: "power1.in" }, t0);
-  const tPort = t0 + 0.45;
-  tl.to(g, { motionPath: mp("#" + flow), duration: dur, ease: "power1.out" }, tPort);
-  tl.to(g, { opacity: 0, duration: 0.22, ease: "sine.in" }, tPort + dur - 0.22);
-  return { tPort, tArrive: tPort + dur };
+  gsap.set(g, { x: p0.x, y: p0.y, scale: 0.4 });
+  /* appears at the source and eases into the line */
+  tl.to(g, { opacity: 1, scale: 1, duration: 0.35, ease: "sine.out" }, t0);
+  tl.to(g, { motionPath: mp("#" + flow), duration: dur, ease }, t0);
+  const tPort = t0 + dur;
+  /* continues inside the hub and slows down at the centre */
+  tl.to(g, { motionPath: mp(IN_ROUTE[flow]), duration: 0.6, ease: "power2.out" }, tPort);
+  const tC = tPort + 0.6;
+  /* gathers on a small circle around the centre and turns with the other packets (orange and blue mix) */
+  swirlCount[flow] = (swirlCount[flow] || 0) + 1;
+  const a0 = ((swirlCount[flow] - 1) * 120 + (colorOf(flow) === CYAN ? 60 : 0)) * Math.PI / 180;
+  const w = 2.4;                                          // rad/s, slow
+  const pts = [];
+  const steps = Math.max(2, Math.round((SWIRL_END - tC) / 0.1));
+  for (let i = 1; i <= steps; i++) {
+    const t = tC + ((SWIRL_END - tC) * i) / steps;
+    const r = SWIRL_R * Math.min(1, (t - tC) / 0.3);
+    const a = a0 + w * (t - tC);
+    pts.push({ x: C.x + r * Math.cos(a), y: C.y + r * Math.sin(a), duration: (SWIRL_END - tC) / steps, ease: "none" });
+  }
+  tl.to(g, { keyframes: pts, scale: 0.85 }, tC);
+  /* absorbed into the centre */
+  tl.to(g, { x: C.x, y: C.y, scale: 0.2, opacity: 0, duration: 0.35, ease: "power2.in" }, SWIRL_END);
+  return tPort;
 }
 
-/* gentle pulses */
-function pulsePort(e, t, col) {
-  tl.to(e, { attr: { fill: col }, duration: 0.18, ease: "sine.out" }, t);
-  tl.to(e, { attr: { fill: "#060b0d" }, duration: 0.6, ease: "sine.inOut" }, t + 0.35);
+/* ---------- outbound: centre → hub port → analysis card ---------- */
+function outbound(flow, t0, dur) {
+  const g = makePacket(colorOf(flow));
+  gsap.set(g, { x: C.x, y: C.y, scale: 0.3 });
+  tl.to(g, { opacity: 1, scale: 1, duration: 0.3, ease: "sine.out" }, t0);
+  tl.to(g, { motionPath: mp(OUT_ROUTE[flow]), duration: 0.5, ease: "power1.in" }, t0);
+  const tPort = t0 + 0.5;
+  tl.to(g, { motionPath: mp("#" + flow), duration: dur, ease: "power2.out" }, tPort);
+  const tArr = tPort + dur;
+  tl.to(g, { opacity: 0, scale: 0.6, duration: 0.18, ease: "sine.in" }, tArr - 0.12);
+  return { tPort, tArr };
 }
-function pulseArrow(e, t) {
-  tl.to(e, { scale: 1.35, transformOrigin: "100% 50%", duration: 0.16, ease: "sine.out" }, t);
-  tl.to(e, { scale: 1, transformOrigin: "100% 50%", duration: 0.45, ease: "sine.inOut" }, t + 0.16);
+
+/* ---------- micro-interactions ---------- */
+function portOn(e, t, col) {
+  tl.to(e, { attr: { fill: col }, duration: 0.2, ease: "sine.out" }, t);
+  tl.to(e, { attr: { fill: "#060b0d" }, duration: 0.7, ease: "sine.inOut" }, t + 0.4);
+}
+function arrowTap(e, t) {
+  tl.to(e, { scale: 1.3, transformOrigin: "100% 50%", duration: 0.18, ease: "sine.out" }, t);
+  tl.to(e, { scale: 1, transformOrigin: "100% 50%", duration: 0.5, ease: "sine.inOut" }, t + 0.18);
 }
 function hideStatic(flow, tOut, tIn) {
-  tl.to(staticDots(flow), { opacity: 0, duration: 0.3, ease: "sine.inOut" }, tOut);
-  tl.to(staticDots(flow), { opacity: 1, duration: 0.5, ease: "sine.inOut" }, tIn);
+  tl.to(staticDots(flow), { opacity: 0, duration: 0.35, ease: "sine.inOut" }, tOut);
+  tl.to(staticDots(flow), { opacity: 1, duration: 0.6, ease: "sine.inOut" }, tIn);
+}
+function cardOn(card, t) {
+  const rects = document.querySelectorAll(card + " > rect");
+  tl.to(rects[0], { attr: { "stroke-opacity": 0.75 }, duration: 0.3, ease: "sine.out" }, t);
+  tl.to(rects[0], { attr: { "stroke-opacity": 0.4 }, duration: 0.75, ease: "sine.inOut" }, t + 0.4);
+  tl.to(rects[1], { attr: { "fill-opacity": 0.22 }, duration: 0.3, ease: "sine.out" }, t);
+  tl.to(rects[1], { attr: { "fill-opacity": 0.13 }, duration: 0.75, ease: "sine.inOut" }, t + 0.4);
 }
 
-/* ---------- PHASES 2 & 3 — Recouvrement (orange) then Tracking (blue) ---------- */
-const IN_DUR = 1.4;
-[
-  ["flow-in-recouvrement", "#src-recouvrement", [0.5, 0.8, 1.1]],
-  ["flow-in-tracking", "#src-tracking", [0.9, 1.2, 1.5]],
-].forEach(([flow, card, starts]) => {
+/* ---------- 1–2.5 s : sources emit (orange and blue move slightly differently) ---------- */
+const IN = [
+  /* flow, card, departures, travel, ease */
+  ["flow-in-recouvrement", "#src-recouvrement", [1.0, 1.28, 1.56], 1.55, "power2.in"],
+  ["flow-in-tracking", "#src-tracking", [1.12, 1.42, 1.72], 1.45, "sine.in"],
+];
+IN.forEach(([flow, card, starts, dur, ease]) => {
   const border = $(card + " > rect");
-  tl.to(border, { attr: { "stroke-opacity": 0.75 }, duration: 0.4, ease: "sine.out" }, starts[0] - 0.15);
-  tl.to(border, { attr: { "stroke-opacity": 0.4 }, duration: 0.9, ease: "sine.inOut" }, starts[2] + 0.5);
-  hideStatic(flow, starts[0] - 0.1, 3.6);
-  pulsePort(startPort(flow), starts[0], colorOf(flow));
-  starts.forEach((t) => pulseArrow(arrow(flow), inbound(flow, t, IN_DUR) - 0.05));
+  tl.to(border, { attr: { "stroke-opacity": 0.72 }, duration: 0.4, ease: "sine.out" }, starts[0] - 0.2);
+  tl.to(border, { attr: { "stroke-opacity": 0.4 }, duration: 1.0, ease: "sine.inOut" }, starts[2] + 0.4);
+  portOn(startPort(flow), starts[0] - 0.05, colorOf(flow));
+  hideStatic(flow, starts[0] - 0.15, 4.6);
+  starts.forEach((t) => arrowTap(arrow(flow), inbound(flow, t, dur, ease) - 0.06));
 });
 
-/* ---------- PHASE 4 — centralise · croise · transforme ---------- */
-tl.to(frame, { attr: { "stroke-opacity": 0.42 }, duration: 0.5, ease: "sine.out" }, 2.0);
-tl.to(frame, { attr: { "stroke-opacity": 0.14 }, duration: 0.9, ease: "sine.inOut" }, 4.6);
-tl.to(halo, { opacity: 1, duration: 1.0, ease: "sine.out" }, 2.2);
-tl.to(halo, { opacity: 0.55, duration: 1.4, ease: "sine.inOut" }, 4.3);
-tl.to(logoGlow, { opacity: 0.45, duration: 0.7, ease: "sine.out" }, 2.9);
-tl.to(logoGlow, { opacity: 0, duration: 1.0, ease: "sine.inOut" }, 4.0);
-tl.to(logo, { filter: "brightness(1.12)", duration: 0.6, ease: "sine.out" }, 3.0);
-tl.to(logo, { filter: "brightness(1)", duration: 0.9, ease: "sine.inOut" }, 3.6);
-
-/* caption words light up in sequence */
-[["#w1", 3.1], ["#w2", 3.5], ["#w3", 3.9]].forEach(([w, t]) => {
-  tl.to(w, { fill: TXT, duration: 0.3, ease: "sine.out" }, t);
-  tl.to(w, { fill: MUTED, duration: 0.8, ease: "sine.inOut" }, t + 0.9);
+/* ---------- 2.8–4.8 s : centralise · croise · transforme ---------- */
+tl.to(halo, { opacity: 0.9, duration: 1.3, ease: "sine.inOut" }, 2.8);
+tl.to(halo, { opacity: 0.55, duration: 1.6, ease: "sine.inOut" }, 4.8);
+tl.to(frame, { attr: { "stroke-opacity": 0.34 }, duration: 0.8, ease: "sine.out" }, 3.0);
+tl.to(frame, { attr: { "stroke-opacity": 0.14 }, duration: 1.2, ease: "sine.inOut" }, 4.8);
+tl.to(logo, { filter: "brightness(1.08)", duration: 0.9, ease: "sine.inOut" }, 3.6);
+tl.to(logo, { filter: "brightness(1)", duration: 1.2, ease: "sine.inOut" }, 4.7);
+[["#w1", 3.3], ["#w2", 3.75], ["#w3", 4.2]].forEach(([w, t]) => {
+  tl.to(w, { fill: TXT, duration: 0.35, ease: "sine.out" }, t);
+  tl.to(w, { fill: MUTED, duration: 0.9, ease: "sine.inOut" }, t + 0.8);
 });
 
-/* ---------- PHASE 5 — redistribution to the analyses ---------- */
-const OUT_DUR = 1.4;
+/* ---------- 4.8–6.9 s : redistribution, in succession ---------- */
+const OUT_DUR = 1.1;
 [
-  ["flow-out-finance", "#out-finance", 4.1],
-  ["flow-out-performance", "#out-performance", 4.3],
-  ["flow-out-operations", "#out-operations", 4.5],
-  ["flow-out-decision", "#out-decision", 4.7],
+  ["flow-out-finance", "#out-finance", 4.7],
+  ["flow-out-performance", "#out-performance", 4.88],
+  ["flow-out-operations", "#out-operations", 5.06],
+  ["flow-out-decision", "#out-decision", 5.24],
 ].forEach(([flow, card, t]) => {
-  hideStatic(flow, t + 0.3, 7.2);
+  hideStatic(flow, t + 0.3, 7.15);
   const a = outbound(flow, t, OUT_DUR);
-  outbound(flow, t + 0.38, OUT_DUR);
-  pulsePort(startPort(flow), a.tPort, colorOf(flow));
-  const arrive = a.tArrive - 0.1;
-  pulseArrow(arrow(flow), arrive);
-  const rects = document.querySelectorAll(card + " > rect");
-  tl.to(rects[0], { attr: { "stroke-opacity": 0.85 }, duration: 0.3, ease: "sine.out" }, arrive);
-  tl.to(rects[0], { attr: { "stroke-opacity": 0.4 }, duration: 0.9, ease: "sine.inOut" }, arrive + 0.6);
-  tl.to(rects[1], { attr: { "fill-opacity": 0.26 }, duration: 0.3, ease: "sine.out" }, arrive);
-  tl.to(rects[1], { attr: { "fill-opacity": 0.13 }, duration: 0.9, ease: "sine.inOut" }, arrive + 0.6);
+  outbound(flow, t + 0.22, OUT_DUR);
+  portOn(startPort(flow), a.tPort - 0.05, colorOf(flow));
+  arrowTap(arrow(flow), a.tArr - 0.1);
+  cardOn(card, a.tArr - 0.1);
 });
-/* all states are back to the reference by ~7.7 s; frame 0 and frame 8 s are identical */
+/* every state is back to the reference by ~7.85 s */
