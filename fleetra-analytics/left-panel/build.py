@@ -43,23 +43,23 @@ def text(x, y, s, size, color, weight=400, anchor='start', ls=0, cls='', op=1):
             f'text-anchor="{anchor}" letter-spacing="{ls}" opacity="{op}">{s}</text>')
 
 out = []
-out.append(f'<defs><radialGradient id="hubGlow"><stop offset="0" stop-color="{ORANGE}" stop-opacity=".16"/><stop offset="1" stop-color="{ORANGE}" stop-opacity="0"/></radialGradient></defs>')
+out.append(f'<defs></defs>')
 out.append(f'<rect width="{W}" height="{H}" fill="{BG}"/>')
 
 CY = 447
 # ---------- column labels ----------
 LAB = 178
 out.append(text(56, LAB, 'SOURCES', 12, MUTED, 600, 'start', 2.4, 'col-label'))
-out.append(text(592, LAB, 'TRANSFORMATION', 12, MUTED, 600, 'middle', 2.4, 'col-label'))
-out.append(text(860, LAB, 'ANALYSE &amp; DÉCISION', 12, MUTED, 600, 'start', 2.4, 'col-label'))
+out.append(text(591, LAB, 'TRANSFORMATION', 12, MUTED, 600, 'middle', 2.4, 'col-label'))
+out.append(text(856, LAB, 'ANALYSE &amp; DÉCISION', 12, MUTED, 600, 'start', 2.4, 'col-label'))
 for x0, x1 in [(56, 100), (592 - 20, 592 + 20), (860, 904)]:
     pass
 
 # ---------- source cards ----------
 def source_card(idn, x, y, color, title, sub_lines, ic, items):
-    w, h = 272, 170
+    w, h = 270, 170
     g = [f'<g id="{idn}" class="card source">']
-    g.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="16" fill="{CARD}" stroke="{color}" stroke-opacity=".45" stroke-width="1.2"/>')
+    g.append(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="16" fill="{CARD}" stroke="{color}" stroke-opacity=".4" stroke-width="1"/>')
     g.append(f'<rect x="{x+20}" y="{y+20}" width="38" height="38" rx="10" fill="{color}" fill-opacity=".13"/>')
     g.append(icon(ic, x + 28, y + 28, 22, color, 1.7))
     g.append(text(x + 70, y + 36, title, 19, TXT, 600))
@@ -83,16 +83,14 @@ out.append(source_card('src-tracking', *SRC2, CYAN, 'Tracking',
                        [('pin', 'Positions'), ('truck', 'Trajets'), ('fence', 'Géofencing'), ('power', 'Coupure')]))
 
 # ---------- hub ----------
-HX0, HX1, HY0, HY1 = 504, 680, CY - 88, CY + 88
+HX0, HX1, HY0, HY1 = 503, 679, CY - 88, CY + 88
 out.append(f'<g id="hub" class="hub" data-phase="2">')
-out.append(f'<circle cx="592" cy="{CY}" r="170" fill="url(#hubGlow)"/>')
-out.append(f'<rect x="{HX0-14}" y="{HY0-14}" width="{HX1-HX0+28}" height="{HY1-HY0+28}" rx="30" fill="none" stroke="{ORANGE}" stroke-opacity=".22" stroke-width="1" stroke-dasharray="3 6" id="hub-ring" data-phase="3"/>')
-out.append(f'<rect x="{HX0}" y="{HY0}" width="{HX1-HX0}" height="{HY1-HY0}" rx="22" fill="{CARD}" stroke="{ORANGE}" stroke-opacity=".85" stroke-width="1.5"/>')
-out.append(f'<image href="data:image/png;base64,@@LOGO@@" x="{592-31}" y="{CY-66}" width="62" height="62"/>')
-out.append(text(592, CY + 38, 'Fleetra', 22, TXT, 700, 'middle'))
-out.append(text(592, CY + 62, 'Analytics', 22, TXT, 400, 'middle'))
+out.append(f'<rect x="{HX0}" y="{HY0}" width="{HX1-HX0}" height="{HY1-HY0}" rx="22" fill="{CARD}" stroke="{ORANGE}" stroke-opacity=".9" stroke-width="1.25" id="hub-frame"/>')
+out.append(f'<image href="data:image/png;base64,@@LOGO@@" x="{591-31}" y="{CY-66}" width="62" height="62"/>')
+out.append(text(591, CY + 38, 'Fleetra', 22, TXT, 700, 'middle'))
+out.append(text(591, CY + 62, 'Analytics', 22, TXT, 400, 'middle'))
 out.append('</g>')
-out.append(text(592, HY1 + 52, 'Centralise · Croise · Transforme', 13, MUTED, 500, 'middle', .4, 'hub-caption'))
+out.append(text(591, HY1 + 52, 'Centralise · Croise · Transforme', 13, MUTED, 500, 'middle', .4, 'hub-caption'))
 
 # ---------- output cards ----------
 OUTS = [
@@ -101,14 +99,14 @@ OUTS = [
     ('out-operations', 'Opérations', ['Analyse de l\'activité et du', 'comportement des véhicules'], 'activity', CYAN),
     ('out-decision', 'Décision', ['Des données fiables pour', 'de meilleures décisions'], 'check', ORANGE),
 ]
-OX, OW, OH, GAP = 860, 266, 100, 20
+OX, OW, OH, GAP = 856, 270, 100, 20
 top = CY - (4 * OH + 3 * GAP) / 2
 centers = []
 for i, (idn, title, sub, ic, col) in enumerate(OUTS):
     y = top + i * (OH + GAP)
     centers.append(y + OH / 2)
     out.append(f'<g id="{idn}" class="card output">')
-    out.append(f'<rect x="{OX}" y="{y}" width="{OW}" height="{OH}" rx="16" fill="{CARD}" stroke="{col}" stroke-opacity=".38" stroke-width="1.2"/>')
+    out.append(f'<rect x="{OX}" y="{y}" width="{OW}" height="{OH}" rx="16" fill="{CARD}" stroke="{col}" stroke-opacity=".4" stroke-width="1"/>')
     out.append(f'<rect x="{OX+18}" y="{y+(OH-40)/2}" width="40" height="40" rx="11" fill="{col}" fill-opacity=".13"/>')
     out.append(icon(ic, OX + 18 + 9, y + (OH - 40) / 2 + 9, 22, col, 1.7))
     out.append(text(OX + 74, y + 40, title, 19, TXT, 600))
@@ -123,8 +121,8 @@ def path(p0, p3, dx=88):
     return p0, c1, c2, p3
 
 # sources -> hub
-s1 = path((SRC1[0] + 272, SRC1[1] + 85), (HX0, CY - 20), 88)
-s2 = path((SRC2[0] + 272, SRC2[1] + 85), (HX0, CY + 20), 88)
+s1 = path((SRC1[0] + 270, SRC1[1] + 85), (HX0, CY - 20), 88)
+s2 = path((SRC2[0] + 270, SRC2[1] + 85), (HX0, CY + 20), 88)
 conns += [('flow-in-recouvrement', s1, ORANGE), ('flow-in-tracking', s2, CYAN)]
 ports = [CY - 33, CY - 11, CY + 11, CY + 33]
 for (idn, *_), py, cy_, (_, _, _, _, col) in zip(OUTS, ports, centers, OUTS):
@@ -138,7 +136,7 @@ for idn, (p0, c1, c2, p3), col in conns:
     lines.append(f'<path id="{idn}" class="flow" data-phase="{phase}" data-family="{fam}" d="{d}" fill="none" stroke="{col}" stroke-opacity=".6" stroke-width="1.4" stroke-linecap="round"/>')
     for t in (0.3, 0.7):
         x, y = bez(p0, c1, c2, p3, t)
-        dots.append(f'<g class="dot" data-flow="{idn}" data-phase="{phase}" data-family="{fam}"><circle cx="{x:.1f}" cy="{y:.1f}" r="7" fill="{col}" opacity=".16"/><circle cx="{x:.1f}" cy="{y:.1f}" r="2.6" fill="{col}"/></g>')
+        dots.append(f'<g class="dot" data-flow="{idn}" data-phase="{phase}" data-family="{fam}"><circle cx="{x:.1f}" cy="{y:.1f}" r="2.6" fill="{col}"/></g>')
     x, y = p0
     nodes.append(f'<circle class="port" cx="{x}" cy="{y}" r="3.6" fill="{BG}" stroke="{col}" stroke-width="1.5"/>')
     x, y = p3
