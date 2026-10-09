@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Père Noël &amp; Cie — Motion design isométrique</title>
+    <script src="vendor/gsap.min.js"></script>
+    <script src="iso.js"></script>
+    <script src="scene.js"></script>
+    <style>
+      @font-face { font-family: "IDisp"; font-weight: 500; src: url("fonts/InterDisplay-Medium.otf") format("opentype"); }
+      @font-face { font-family: "IDisp"; font-weight: 600; src: url("fonts/InterDisplay-SemiBold.otf") format("opentype"); }
+      @font-face { font-family: "IDisp"; font-weight: 800; src: url("fonts/InterDisplay-ExtraBold.otf") format("opentype"); }
+      @font-face { font-family: "IDisp"; font-weight: 900; src: url("fonts/InterDisplay-Black.otf") format("opentype"); }
+      :root {
+        --night: #080f2c;
+        --gold: #ffd35a;
+        --red: #ff4b57;
+        --ice: #cfe1ff;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #060b22; }
+      #root {
+        position: relative; width: 100%; height: 100%; overflow: hidden;
+        font-family: "IDisp", sans-serif; color: #fff;
+        background: radial-gradient(120% 90% at 50% 100%, #24398a 0%, #121c5a 38%, #0a1038 70%, #060a26 100%);
+      }
+      .layer { position: absolute; inset: 0; }
+      #aurora1 { background: radial-gradient(40% 30% at 30% 20%, rgba(70, 255, 190, .22), transparent 70%); }
+      #aurora2 { background: radial-gradient(45% 28% at 72% 14%, rgba(150, 110, 255, .26), transparent 70%); }
+      #moon { position: absolute; left: 880px; top: 70px; width: 150px; height: 150px; border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #fffdf0, #f3edcf 60%, #d9d2ae); box-shadow: 0 0 120px 40px rgba(255, 244, 200, .25); }
+      #stage { position: absolute; inset: 0; width: 1920px; height: 1080px; overflow: hidden; }
+      #vignette { background: radial-gradient(120% 100% at 50% 50%, transparent 55%, rgba(2, 4, 20, .55) 100%); pointer-events: none; }
+      /* HUD */
+      .hud { position: absolute; opacity: 0; }
+      #brand { left: 48px; top: 40px; display: flex; align-items: center; gap: 16px; padding: 10px 26px 10px 16px; border-radius: 999px; background: rgba(6, 10, 38, .62); }
+      #brand .mark { width: 46px; height: 46px; }
+      #brand .bt { font-weight: 900; font-size: 24px; letter-spacing: .14em; }
+      #brand .bt b { color: var(--gold); font-weight: 900; }
+      #count { right: 48px; top: 34px; text-align: right; padding: 10px 22px 12px; border-radius: 22px; background: rgba(6, 10, 38, .55); }
+      #count .lab { font-weight: 800; font-size: 17px; letter-spacing: .26em; color: var(--ice); opacity: .85; }
+      #count .num { font-weight: 900; font-size: 66px; letter-spacing: -.01em; font-variant-numeric: tabular-nums; margin-top: 2px;
+        text-shadow: 0 0 30px rgba(255, 211, 90, .35); }
+      #count .num span { color: var(--gold); }
+      #chap { left: 64px; bottom: 82px; width: 900px; }
+      .chap { position: absolute; left: 0; bottom: 0; opacity: 0; display: flex; align-items: flex-end; gap: 26px; }
+      .chap .n { font-weight: 900; font-size: 132px; line-height: .8; color: rgba(255,211,90,.16); -webkit-text-stroke: 3px var(--gold); letter-spacing: -.03em; }
+      .chap .t { font-weight: 900; font-size: 52px; letter-spacing: .02em; line-height: 1; text-transform: uppercase; }
+      .chap .s { font-weight: 500; font-size: 27px; color: var(--ice); margin-top: 12px; }
+      .chap .bar { width: 6px; align-self: stretch; background: linear-gradient(var(--gold), var(--red)); border-radius: 3px; }
+      #prog { left: 64px; right: 64px; bottom: 40px; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, .12); overflow: hidden; }
+      #prog i { display: block; height: 100%; width: 100%; transform-origin: 0 50%; background: linear-gradient(90deg, var(--gold), var(--red)); }
+      /* intro */
+      #intro { left: 96px; top: 300px; width: 1100px; opacity: 1; }
+      #intro .kick { font-weight: 800; font-size: 22px; letter-spacing: .38em; color: var(--gold); }
+      #intro .big { font-weight: 900; font-size: 160px; line-height: .92; letter-spacing: -.03em; margin-top: 18px; }
+      #intro .big .ln { display: block; overflow: hidden; padding-bottom: 14px; margin-bottom: -14px; }
+      #intro .big .ch { display: inline-block; }
+      #intro .amp { color: var(--gold); font-size: 110px; }
+      #intro .tag { font-weight: 500; font-size: 36px; color: var(--ice); margin-top: 34px; max-width: 900px; line-height: 1.25; }
+      /* stats */
+      #stats { right: 64px; top: 190px; width: 520px; opacity: 1; }
+      .card { position: absolute; right: 0; width: 520px; padding: 26px 32px; border-radius: 22px; opacity: 0;
+        background: linear-gradient(135deg, rgba(20, 34, 98, .78), rgba(10, 18, 62, .72)); border: 1.5px solid rgba(207, 225, 255, .28);
+        box-shadow: 0 24px 60px rgba(0, 0, 20, .45); }
+      .card .v { font-weight: 900; font-size: 92px; line-height: 1; letter-spacing: -.03em; color: #fff; font-variant-numeric: tabular-nums; }
+      .card .v small { font-size: 48px; color: var(--gold); margin-left: 6px; letter-spacing: 0; }
+      .card .l { font-weight: 600; font-size: 25px; color: var(--ice); margin-top: 8px; letter-spacing: .01em; }
+      .card .k { position: absolute; right: 28px; top: 24px; font-weight: 800; font-size: 15px; letter-spacing: .24em; color: var(--gold); }
+      /* outro */
+      #outro { inset: 0; opacity: 1; }
+      #outro .veil { position: absolute; inset: 0; opacity: 0; background: radial-gradient(70% 70% at 50% 52%, rgba(6, 10, 38, .78), rgba(6, 10, 38, .94)); }
+      #outro .center { position: absolute; left: 0; right: 0; top: 262px; text-align: center; }
+      #outro .logo { width: 220px; height: 220px; margin: 0 auto; opacity: 0; }
+      #outro .name { font-weight: 900; font-size: 148px; letter-spacing: -.03em; line-height: 1; margin-top: 8px; opacity: 0; }
+      #outro .name em { font-style: normal; color: var(--gold); }
+      #outro .line { font-weight: 500; font-size: 44px; color: var(--ice); margin-top: 22px; opacity: 0; }
+      #outro .cta { display: inline-block; margin-top: 52px; padding: 22px 46px; border-radius: 999px; font-weight: 800; font-size: 30px; letter-spacing: .04em;
+        background: linear-gradient(90deg, var(--gold), #ffb43a); color: #2a1a05; opacity: 0; box-shadow: 0 0 60px rgba(255, 211, 90, .45); }
+      #outro .credit { position: absolute; left: 0; right: 0; bottom: 58px; text-align: center; font-weight: 600; font-size: 21px; letter-spacing: .3em; color: rgba(207, 225, 255, .7); opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="38" data-width="1920" data-height="1080">
+      <audio id="bgm" src="assets/music.mp3" data-start="0" data-duration="38" data-track-index="0" data-volume="0.9"></audio>
+      <div id="bg" class="layer">
+        <div id="aurora1" class="layer"></div>
+        <div id="aurora2" class="layer"></div>
+        <div id="moon"></div>
+        <svg id="stars" class="layer" width="1920" height="1080" viewBox="0 0 1920 1080"></svg>
+      </div>
+
+      <svg id="stage" data-layout-allow-overlap data-layout-allow-occlusion data-layout-allow-overflow viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="gTreeA" x1="0" x2="1"><stop offset="0" stop-color="#3dc08f" /><stop offset=".55" stop-color="#1f8a63" /><stop offset="1" stop-color="#126046" /></linearGradient>
+          <radialGradient id="gSnow" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#ffffff" /><stop offset="1" stop-color="#b9cdf0" /></radialGradient>
+          <radialGradient id="gSkin" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#ffe3c8" /><stop offset="1" stop-color="#e9a98a" /></radialGradient>
+          <radialGradient id="gHalo"><stop offset="0" stop-color="#ffd27a" stop-opacity=".95" /><stop offset=".4" stop-color="#ffb347" stop-opacity=".42" /><stop offset="1" stop-color="#ff9a2e" stop-opacity="0" /></radialGradient>
+          <radialGradient id="gRed"><stop offset="0" stop-color="#ff4b4b" stop-opacity=".9" /><stop offset="1" stop-color="#ff4b4b" stop-opacity="0" /></radialGradient>
+          <radialGradient id="gCloud"><stop offset="0" stop-color="#8fa8e8" stop-opacity=".55" /><stop offset="1" stop-color="#5a74c8" stop-opacity="0" /></radialGradient>
+          <radialGradient id="gSack" cx=".4" cy=".3" r=".9"><stop offset="0" stop-color="#c58a58" /><stop offset="1" stop-color="#7d5030" /></radialGradient>
+          <linearGradient id="gRockL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6d7fbf" /><stop offset="1" stop-color="#2b3774" /></linearGradient>
+          <linearGradient id="gRockR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4d5c9e" /><stop offset="1" stop-color="#1c2554" /></linearGradient>
+          <linearGradient id="gGround" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f8ff" /><stop offset="1" stop-color="#d4e2ff" /></linearGradient>
+          <linearGradient id="gTrail" x1="0" x2="1"><stop offset="0" stop-color="#ffd35a" stop-opacity="0" /><stop offset="1" stop-color="#ffe9a8" stop-opacity="1" /></linearGradient>
+        </defs>
+        <g id="cam">
+          <g id="gClouds"></g>
+          <g id="gHQ"></g>
+          <g id="gHQfx"></g>
+          <g id="gTown"></g>
+          <g id="gRoute"></g>
+          <g id="gFx"></g>
+        </g>
+      </svg>
+
+      <div id="vignette" class="layer"></div>
+      <div class="layer" style="background:linear-gradient(0deg,rgba(3,6,26,.72) 0,rgba(3,6,26,0) 300px),linear-gradient(180deg,rgba(3,6,26,.55) 0,rgba(3,6,26,0) 170px);pointer-events:none"></div>
+
+      <div id="brand" class="hud">
+        <svg class="mark" viewBox="-48 -92 96 112"><g id="markGift"></g></svg>
+        <div class="bt">PÈRE NOËL <b>&amp;</b> Cie</div>
+      </div>
+      <div id="count" class="hud"><div class="lab">CADEAUX LIVRÉS CETTE NUIT</div><div class="num" id="cntNum">0</div></div>
+      <div id="chap" class="hud" style="opacity:1">
+        <div class="chap" id="c1"><div class="n">01</div><div><div class="t">Fabrication</div><div class="s">Chaque cadeau, emballé à la chaîne.</div></div></div>
+        <div class="chap" id="c2"><div class="n">02</div><div><div class="t">Distribution</div><div class="s">Livraison directe, par la cheminée.</div></div></div>
+        <div class="chap" id="c3"><div class="n">03</div><div><div class="t">Le dernier mètre</div><div class="s">Du toit au pied du sapin, en trois secondes.</div></div></div>
+        <div class="chap" id="c4"><div class="n">04</div><div><div class="t">Résultats</div><div class="s">La plus grande tournée logistique du monde.</div></div></div>
+      </div>
+      <div id="prog" class="hud"><i id="progFill"></i></div>
+
+      <div id="intro" class="hud">
+        <div class="kick" id="iKick">DEPUIS 1823 · PÔLE NORD</div>
+        <div class="big" id="iBig"><span class="ln" id="l1">PÈRE NOËL</span><span class="ln" id="l2"><span class="amp">&amp;</span> Cie</span></div>
+        <div class="tag" id="iTag">La livraison de cadeaux, à l’échelle de la planète.</div>
+      </div>
+
+      <div id="stats" class="hud">
+        <div class="card" id="s1" style="top:0"><div class="k">VOLUME</div><div class="v"><span id="n1">0</span><small>Mrd</small></div><div class="l">de cadeaux livrés en une seule nuit</div></div>
+        <div class="card" id="s2" style="top:222px"><div class="k">PONCTUALITÉ</div><div class="v"><span id="n2">0</span><small>%</small></div><div class="l">de livraisons à l’heure, sans exception</div></div>
+        <div class="card" id="s3" style="top:444px"><div class="k">COUVERTURE</div><div class="v"><span id="n3">0</span><small>pays</small></div><div class="l">desservis par une seule flotte de traîneaux</div></div>
+      </div>
+
+      <div id="outro" class="hud">
+        <div class="veil" id="oVeil"></div>
+        <div class="center">
+          <svg class="logo" id="oLogo" viewBox="-48 -92 96 112"><g id="outroGift"></g></svg>
+          <div class="name" id="oName">PÈRE NOËL <em>&amp;</em> Cie</div>
+          <div class="line" id="oLine">La magie, livrée à l’heure.</div>
+          <div class="cta" id="oCta">Demandez votre devis dès le 1er décembre</div>
+        </div>
+        <div class="credit" id="oCred">MOTION DESIGN 3D ISOMÉTRIQUE · CLAUDE × HYPERFRAMES</div>
+      </div>
+    </div>
+
+    <script src="timeline.js"></script>
+    <script>
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
