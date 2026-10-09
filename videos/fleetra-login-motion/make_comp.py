@@ -2,6 +2,8 @@
 The SVG is reused verbatim; only the caption is split into <tspan>s so each word can light up."""
 import re, pathlib, sys
 TRANSPARENT = '--transparent' in sys.argv   # alpha render: no scene background at all
+MOTION = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--motion=')), 'motion.js')
+DURATION = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--duration=')), '8')
 SCENE = next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--scene=')), 'desktop')
 
 SRC = pathlib.Path(f'../../fleetra-analytics/left-panel/scene-{SCENE}.html').read_text()
@@ -19,12 +21,13 @@ cap = re.search(r'<g id="caption-layer">.*?</g>', svg, re.S)
 cap_html = cap.group(0) if cap else ''
 svg = svg.replace(cap_html, '')
 svg = svg.replace('</svg>', '<g id="trace-layer"></g><g id="packets"></g>' + cap_html + '</svg>')
-BG = 'transparent' if TRANSPARENT else '#060b0d'
+BG = 'transparent' if TRANSPARENT else ('#081318' if 'bg-layer' in svg else '#060b0d')
 if TRANSPARENT:
     svg, n = re.subn(rf'<rect width="{VW}" height="{VH}" fill="#060b0d"/>', '', svg)
-    assert n == 1, 'scene background rect not found'
+    svg, n2 = re.subn(r'<g id="bg-layer">.*?</g>', '', svg, flags=re.S)   # v4 scenes keep their background in one layer
+    assert n + n2 == 1, 'scene background not found'
 
-timeline = pathlib.Path('motion.js').read_text()
+timeline = pathlib.Path(MOTION).read_text()
 
 html = f'''<!doctype html>
 <html lang="fr">
@@ -39,6 +42,7 @@ html = f'''<!doctype html>
   @font-face {{ font-family: "Inter Display"; font-weight: 500; src: url("fonts/InterDisplay-Medium.otf") format("opentype"); }}
   @font-face {{ font-family: "Inter Display"; font-weight: 600; src: url("fonts/InterDisplay-SemiBold.otf") format("opentype"); }}
   @font-face {{ font-family: "Inter Display"; font-weight: 700; src: url("fonts/InterDisplay-Bold.otf") format("opentype"); }}
+  @font-face {{ font-family: "DejaVu Sans Mono"; font-weight: 400; src: url("fonts/DejaVuSansMono.ttf") format("truetype"); }}
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
   html, body {{ width: {CW_}px; height: {CH_}px; overflow: hidden; background: {BG}; }}
   #root {{ position: relative; width: 100%; height: 100%; overflow: hidden; background: {BG}; }}
@@ -46,7 +50,7 @@ html = f'''<!doctype html>
 </style>
 </head>
 <body>
-<div id="root" data-composition-id="main" data-start="0" data-duration="8" data-width="{CW_}" data-height="{CH_}">
+<div id="root" data-composition-id="main" data-start="0" data-duration="{DURATION}" data-width="{CW_}" data-height="{CH_}">
 {svg}
 </div>
 <script>
