@@ -24,6 +24,7 @@ ICONS = {
     'fence': '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',
     'power': '<path d="M12 3v9"/><path d="M6.3 7.3a8 8 0 1 0 11.4 0"/>',
     'pie': '<path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/>',
+    'activity': '<path d="M3 12h4l3-8 4 16 3-8h4"/>',
     'check': '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>',
 }
 
@@ -50,7 +51,7 @@ CY = 447
 LAB = 178
 out.append(text(56, LAB, 'SOURCES', 12, MUTED, 600, 'start', 2.4, 'col-label'))
 out.append(text(592, LAB, 'TRANSFORMATION', 12, MUTED, 600, 'middle', 2.4, 'col-label'))
-out.append(text(860, LAB, 'ANALYSES', 12, MUTED, 600, 'start', 2.4, 'col-label'))
+out.append(text(860, LAB, 'ANALYSE &amp; DÉCISION', 12, MUTED, 600, 'start', 2.4, 'col-label'))
 for x0, x1 in [(56, 100), (592 - 20, 592 + 20), (860, 904)]:
     pass
 
@@ -97,7 +98,7 @@ out.append(text(592, HY1 + 52, 'Centralise · Croise · Transforme', 13, MUTED, 
 OUTS = [
     ('out-finance', 'Finance', ['Suivi des performances', 'financières'], 'bars', ORANGE),
     ('out-performance', 'Performance', ['Analyse de la flotte', 'et des indicateurs'], 'pie', ORANGE),
-    ('out-tracking', 'Tracking', ['Suivi et comportement', 'des véhicules'], 'pin', CYAN),
+    ('out-operations', 'Opérations', ['Analyse de l\'activité et du', 'comportement des véhicules'], 'activity', ORANGE),
     ('out-decision', 'Décision', ['Des données fiables pour', 'de meilleures décisions'], 'check', ORANGE),
 ]
 OX, OW, OH, GAP = 860, 266, 100, 20
@@ -136,8 +137,10 @@ for idn, (p0, c1, c2, p3), col in conns:
     for t in (0.3, 0.7):
         x, y = bez(p0, c1, c2, p3, t)
         dots.append(f'<g class="dot" data-flow="{idn}"><circle cx="{x:.1f}" cy="{y:.1f}" r="7" fill="{col}" opacity=".16"/><circle cx="{x:.1f}" cy="{y:.1f}" r="2.6" fill="{col}"/></g>')
-    for (x, y) in (p0, p3):
-        nodes.append(f'<circle class="port" cx="{x}" cy="{y}" r="3.6" fill="{BG}" stroke="{col}" stroke-width="1.5"/>')
+    x, y = p0
+    nodes.append(f'<circle class="port" cx="{x}" cy="{y}" r="3.6" fill="{BG}" stroke="{col}" stroke-width="1.5"/>')
+    x, y = p3
+    nodes.append(f'<path class="arrow" d="M{x-9},{y-4.6} L{x},{y} L{x-9},{y+4.6} Z" fill="{col}" fill-opacity=".9"/>')
 
 # connections go under cards, so insert before cards: rebuild order
 body = ''.join(out)
