@@ -97,8 +97,9 @@ out.append(f'<g id="bg-layer"><rect width="{W}" height="{H}" fill="{BG}"/>'
 
 # ---------------- column labels ----------------
 MONO = "'DejaVu Sans Mono', 'Liberation Mono', monospace"
-out.append(text(LX, S[0][1] - 12, 'SOURCES', 11, LABEL, 400, ls='0.88', cls='col-label', family=MONO))
-out.append(text(RX, O[0][1] - 12, 'RÉSULTATS', 11, LABEL, 400, ls='0.88', cls='col-label', family=MONO))
+LABEL_Y = min(S[0][1], O[0][1]) - 12          # both column labels on the same baseline
+out.append(text(LX, LABEL_Y, 'SOURCES', 11, LABEL, 400, ls='0.88', cls='col-label', family=MONO))
+out.append(text(RX, LABEL_Y, 'RÉSULTATS', 11, LABEL, 400, ls='0.88', cls='col-label', family=MONO))
 
 # ---------------- cards ----------------
 def card_frame(x, y, h):

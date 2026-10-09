@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fleetra Analytics — schéma animé (fond transparent)</title>
+<style>
+  /* La vidéo n'a plus de fond : c'est la page qui le donne. Ici, le fond du panneau de connexion
+     (couleur, grille de points, bords assombris), modifiable sans re-rendre la vidéo. */
+  .fleetra-visual {
+    position: relative;
+    aspect-ratio: 960 / 540;
+    width: 100%;
+    overflow: hidden;
+    background:
+      radial-gradient(75% 75% at 50% 50%, transparent 55%, rgba(0, 0, 0, .45) 100%),            /* bords assombris */
+      radial-gradient(circle, rgba(255, 255, 255, .04) 1px, transparent 1.2px) 0 0 / 2.5% 4.444%, /* grille de points 24 px */
+      #081318;
+  }
+  .fleetra-visual video, .fleetra-visual img {
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none;
+  }
+  .fleetra-visual img { display: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .fleetra-visual video { display: none; }
+    .fleetra-visual img { display: block; }     /* image fixe transparente, sans particules */
+  }
+</style>
+</head>
+<body style="margin:0">
+  <div class="fleetra-visual">
+    <video autoplay muted loop playsinline aria-hidden="true"></video>
+    <img src="fleetra-still.png" alt="Recouvrement et Tracking alimentent Fleetra Analytics, qui centralise, croise et transforme les données en Finance, Performance, Opérations et Décision.">
+  </div>
+<script>
+  /* Safari, et tout navigateur iOS (moteur WebKit), n'affiche pas l'alpha du VP9 : il reçoit le HEVC alpha.
+     Les autres reçoivent le WebM VP9, en 1x sur les écrans standard. Rien n'est chargé si l'animation est réduite. */
+  (function () {
+    var box = document.querySelector('.fleetra-visual');
+    var video = box.querySelector('video'), still = box.querySelector('img');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    video.addEventListener('error', function () { video.hidden = true; still.style.display = 'block'; });
+    video.src = /Apple/.test(navigator.vendor) ? 'fleetra-safari.mov'
+              : (devicePixelRatio >= 1.5 ? 'fleetra.webm' : 'fleetra-1x.webm');
+  })();
+</script>
+</body>
+</html>
