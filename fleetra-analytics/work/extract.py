@@ -179,3 +179,11 @@ cv2.imwrite('prev_mid.png', over((120, 120, 120)))
 cv2.imwrite('../fleetra-scene-transparent.png', rgba)
 cv2.imwrite('../fleetra-scene-fond-sombre.png', over((14, 12, 12)))
 print('done', rgba.shape)
+
+# ---- full image: cleaned left scene + untouched login panel
+samples = [src[y, x].astype(np.float32) for (x, y) in [(1300, 800), (1500, 300), (1250, 30), (1250, 850), (1700, 840), (1230, 400)]]
+bg = np.median(np.array(samples), axis=0)
+full = src.copy()
+full[:, :W] = over(tuple(bg))
+cv2.imwrite('../fleetra-image-complete.png', full)
+print('bg', bg)
