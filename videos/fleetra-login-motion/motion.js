@@ -54,13 +54,13 @@ const OUT_ROUTE = {};
 /* ---------- data packet: coloured halo + coloured ring + white core (readable on dark and on the orange tile) ---------- */
 function makePacket(col) {
   const g = el("g", { opacity: 0 }, $("#packets"));
-  g.innerHTML = `<circle r="7.5" fill="${col}" opacity=".2"/><circle r="3.6" fill="${col}"/><circle r="1.6" fill="#ffffff" opacity=".95"/>`;
+  g.innerHTML = `<circle r="8.5" fill="${col}" opacity=".2"/><circle r="4.2" fill="${col}"/><circle r="1.9" fill="#ffffff" opacity=".95"/>`;
   return g;
 }
 const mp = (path, start = 0, end = 1) => ({ path, align: path, alignOrigin: [0.5, 0.5], start, end });
 
 /* ---------- inbound: source → hub port → centre → short swirl → absorbed ---------- */
-const SWIRL_R = 15;
+const SWIRL_R = 13;
 const SWIRL_END = 4.45;                 // all packets are absorbed together
 const swirlCount = {};   // orange at 0/120/240°, blue at 60/180/300° → the two families interleave
 function inbound(flow, t0, dur, ease) {
@@ -148,9 +148,13 @@ tl.to(frame, { attr: { "stroke-opacity": 0.34 }, duration: 0.8, ease: "sine.out"
 tl.to(frame, { attr: { "stroke-opacity": 0.14 }, duration: 1.2, ease: "sine.inOut" }, 4.8);
 tl.to(logo, { filter: "brightness(1.08)", duration: 0.9, ease: "sine.inOut" }, 3.6);
 tl.to(logo, { filter: "brightness(1)", duration: 1.2, ease: "sine.inOut" }, 4.7);
+/* caption words light up one after the other, then return to the caption's own resting colour */
+const CAP_REST = $(".hub-caption").getAttribute("fill") || MUTED;
+const CAP_LIT = CAP_REST.toLowerCase() === MUTED ? TXT : "#ffffff";
 [["#w1", 3.3], ["#w2", 3.75], ["#w3", 4.2]].forEach(([w, t]) => {
-  tl.to(w, { fill: TXT, duration: 0.35, ease: "sine.out" }, t);
-  tl.to(w, { fill: MUTED, duration: 0.9, ease: "sine.inOut" }, t + 0.8);
+  gsap.set(w, { fill: CAP_REST });
+  tl.to(w, { fill: CAP_LIT, duration: 0.35, ease: "sine.out" }, t);
+  tl.to(w, { fill: CAP_REST, duration: 0.9, ease: "sine.inOut" }, t + 0.8);
 });
 
 /* ---------- 4.8–6.9 s : redistribution, in succession ---------- */
