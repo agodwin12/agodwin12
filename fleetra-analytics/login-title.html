@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fleetra Analytics — en-tête du formulaire</title>
+<style>
+  :root { --fleetra-orange: #ee4b0c; }
+  body { margin: 0; background: #0b0a0d; color: #fff; font-family: "Inter", system-ui, sans-serif; }
+  .login-panel { max-width: 480px; margin: 0 auto; padding: 48px 24px; box-sizing: border-box; }
+
+  /* [logo] Bienvenue dans Fleetra Analytics — logo à gauche, une seule ligne sur desktop */
+  .login-title {
+    display: flex;
+    align-items: center;               /* logo centré verticalement sur le texte */
+    gap: .4em;
+    margin: 0 0 .6em;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -.01em;
+    /* s'adapte à la largeur du panneau, sans devenir illisible */
+    font-size: clamp(1.25rem, 5.4vw, 1.9rem);
+  }
+  .login-title img { height: 1.18em; width: 1.18em; flex: none; border-radius: .2em; }
+  .login-title .brand { color: var(--fleetra-orange); }
+
+  /* écrans étroits : le logo reste à gauche, le texte passe à la ligne proprement (pas de débordement) */
+  .login-title span.text { min-width: 0; overflow-wrap: anywhere; text-wrap: balance; }
+  @media (min-width: 480px) { .login-title span.text { white-space: nowrap; } }
+</style>
+</head>
+<body>
+  <main class="login-panel">
+    <h1 class="login-title">
+      <img src="fleetra-logo.svg" alt="" aria-hidden="true">
+      <span class="text">Bienvenue dans <span class="brand">Fleetra Analytics</span></span>
+    </h1>
+    <p>Accédez à votre espace analytique.</p>
+    <!-- … champs Email or phone number, Password, Forgot your password?, Sign in : inchangés … -->
+  </main>
+</body>
+</html>
