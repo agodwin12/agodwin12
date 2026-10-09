@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fleetra Analytics — motion responsive (fond indépendant)</title>
+<style>
+  /* Le fond reste dans le CSS : il se remplace sans re-rendre le motion. */
+  .fleetra-visual {
+    container-type: inline-size;
+    position: relative;
+    aspect-ratio: 960 / 540;
+    width: 100%;
+    background: #060b0d;            /* ← image, dégradé, texture… au choix */
+  }
+  .fleetra-visual video {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: contain; pointer-events: none;
+  }
+  /* Grand conteneur : version complète (avec les types de données sous chaque source) */
+  .v-compact { display: none; }
+  /* Petit conteneur : on retire la décoration avant de réduire le texte */
+  @container (max-width: 620px) {
+    .v-desktop { display: none; }
+    .v-compact { display: block; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fleetra-visual video { display: none !important; }
+    .fleetra-visual::after { content: ""; position: absolute; inset: 0;
+      background: url("fleetra-motion-desktop-alpha-frame.png") center / contain no-repeat; }
+  }
+</style>
+</head>
+<body style="margin:0">
+  <div class="fleetra-visual">
+    <video class="v-desktop" autoplay muted loop playsinline aria-hidden="true">
+      <source src="fleetra-motion-desktop-alpha.webm" type='video/webm; codecs="vp9"' media="(min-resolution: 1.5dppx)">
+      <source src="fleetra-motion-desktop-alpha-1x.webm" type='video/webm; codecs="vp9"'>
+    </video>
+    <video class="v-compact" autoplay muted loop playsinline aria-hidden="true">
+      <source src="fleetra-motion-compact-alpha.webm" type='video/webm; codecs="vp9"' media="(min-resolution: 1.5dppx)">
+      <source src="fleetra-motion-compact-alpha-1x.webm" type='video/webm; codecs="vp9"'>
+    </video>
+  </div>
+</body>
+</html>

@@ -54,13 +54,13 @@ const OUT_ROUTE = {};
 /* ---------- data packet: coloured halo + coloured ring + white core (readable on dark and on the orange tile) ---------- */
 function makePacket(col) {
   const g = el("g", { opacity: 0 }, $("#packets"));
-  g.innerHTML = `<circle r="8.5" fill="${col}" opacity=".2"/><circle r="4.2" fill="${col}"/><circle r="1.9" fill="#ffffff" opacity=".95"/>`;
+  g.innerHTML = `<circle r="7.5" fill="${col}" opacity=".2"/><circle r="3.8" fill="${col}"/><circle r="1.7" fill="#ffffff" opacity=".95"/>`;
   return g;
 }
 const mp = (path, start = 0, end = 1) => ({ path, align: path, alignOrigin: [0.5, 0.5], start, end });
 
 /* ---------- inbound: source → hub port → centre → short swirl → absorbed ---------- */
-const SWIRL_R = 13;
+const SWIRL_R = 11;
 const SWIRL_END = 4.45;                 // all packets are absorbed together
 const swirlCount = {};   // orange at 0/120/240°, blue at 60/180/300° → the two families interleave
 function inbound(flow, t0, dur, ease) {
