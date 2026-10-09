@@ -1,6 +1,7 @@
 """Builds index.html (HyperFrames composition) from the validated static left panel.
 The SVG is reused verbatim; only the caption is split into <tspan>s so each word can light up."""
-import re, pathlib
+import re, pathlib, sys
+TRANSPARENT = '--transparent' in sys.argv   # alpha render: no scene background at all
 
 SRC = pathlib.Path('../../fleetra-analytics/left-panel/index.html').read_text()
 svg = re.search(r'<svg id="left-panel".*?</svg>', SRC, re.S).group(0)
@@ -10,6 +11,10 @@ svg = svg.replace('Centralise · Croise · Transforme',
                   '<tspan id="w1">Centralise</tspan> · <tspan id="w2">Croise</tspan> · <tspan id="w3">Transforme</tspan>')
 # moving data packets live above the ports
 svg = svg.replace('</svg>', '<g id="trace-layer"></g><g id="packets"></g></svg>')
+BG = 'transparent' if TRANSPARENT else '#060b0d'
+if TRANSPARENT:
+    svg, n = re.subn(r'<rect width="1182" height="875" fill="#060b0d"/>', '', svg)
+    assert n == 1, 'scene background rect not found'
 
 timeline = pathlib.Path('motion.js').read_text()
 
@@ -27,8 +32,8 @@ html = f'''<!doctype html>
   @font-face {{ font-family: "Inter Display"; font-weight: 600; src: url("fonts/InterDisplay-SemiBold.otf") format("opentype"); }}
   @font-face {{ font-family: "Inter Display"; font-weight: 700; src: url("fonts/InterDisplay-Bold.otf") format("opentype"); }}
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-  html, body {{ width: 2364px; height: 1750px; overflow: hidden; background: #060b0d; }}
-  #root {{ position: relative; width: 100%; height: 100%; overflow: hidden; background: #060b0d; }}
+  html, body {{ width: 2364px; height: 1750px; overflow: hidden; background: {BG}; }}
+  #root {{ position: relative; width: 100%; height: 100%; overflow: hidden; background: {BG}; }}
   #root svg {{ position: absolute; inset: 0; display: block; font-family: "Inter Display", sans-serif; }}
 </style>
 </head>
@@ -45,4 +50,4 @@ tl.seek(0);
 </html>
 '''
 pathlib.Path('index.html').write_text(html)
-print('index.html written', len(html))
+print('index.html written', len(html), 'transparent' if TRANSPARENT else 'opaque')

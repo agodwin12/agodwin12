@@ -142,7 +142,7 @@ for idn, (p0, c1, c2, p3), col in conns:
         x, y = bez(p0, c1, c2, p3, t)
         dots.append(f'<g class="dot" data-flow="{idn}" data-phase="{phase}" data-family="{fam}"><circle cx="{x:.1f}" cy="{y:.1f}" r="2.6" fill="{col}"/></g>')
     x, y = p0
-    nodes.append(f'<circle class="port" cx="{x}" cy="{y}" r="3.6" fill="{BG}" stroke="{col}" stroke-width="1.5"/>')
+    nodes.append(f'<circle class="port" cx="{x}" cy="{y}" r="3.6" fill="{col}" fill-opacity="0" stroke="{col}" stroke-width="1.5"/>')
     x, y = p3
     nodes.append(f'<path class="arrow" d="M{x-9},{y-4.6} L{x},{y} L{x-9},{y+4.6} Z" fill="{col}" fill-opacity=".9"/>')
 

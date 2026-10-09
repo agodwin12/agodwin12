@@ -107,8 +107,8 @@ function outbound(flow, t0, dur) {
 
 /* ---------- micro-interactions ---------- */
 function portOn(e, t, col) {
-  tl.to(e, { attr: { fill: col }, duration: 0.2, ease: "sine.out" }, t);
-  tl.to(e, { attr: { fill: "#060b0d" }, duration: 0.7, ease: "sine.inOut" }, t + 0.4);
+  tl.to(e, { attr: { "fill-opacity": 1 }, duration: 0.2, ease: "sine.out" }, t);
+  tl.to(e, { attr: { "fill-opacity": 0 }, duration: 0.7, ease: "sine.inOut" }, t + 0.4);
 }
 function arrowTap(e, t) {
   tl.to(e, { scale: 1.3, transformOrigin: "100% 50%", duration: 0.18, ease: "sine.out" }, t);
