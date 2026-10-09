@@ -8,7 +8,8 @@ SRC = pathlib.Path(f'../../fleetra-analytics/left-panel/scene-{SCENE}.html').rea
 svg = re.search(r'<svg id="left-panel".*?</svg>', SRC, re.S).group(0)
 # fill the composition box (keep the 1182x875 design coordinates via viewBox)
 VW, VH = map(int, re.search(r'viewBox="0 0 (\d+) (\d+)"', svg).groups())
-CW_, CH_ = VW * 2, VH * 2                       # rendered at 2x for crisp text
+SCALE = int(next((a.split('=', 1)[1] for a in sys.argv if a.startswith('--scale=')), '2'))
+CW_, CH_ = VW * SCALE, VH * SCALE               # 2x by default for crisp text; --scale=1 for the light web file
 svg = re.sub(r'width="\d+" height="\d+" viewBox', 'width="100%" height="100%" viewBox', svg, count=1)
 svg = svg.replace('Centralise · Croise · Transforme',
                   '<tspan id="w1">Centralise</tspan> · <tspan id="w2">Croise</tspan> · <tspan id="w3">Transforme</tspan>')
