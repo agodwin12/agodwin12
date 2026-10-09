@@ -148,19 +148,11 @@ first_card = body.index('<g id="src-recouvrement"')
 body = body[:first_card] + '<g id="flows">' + ''.join(lines) + '</g>' + body[first_card:]
 body += '<g id="ports">' + ''.join(nodes) + '</g>' + '<g id="dots">' + ''.join(dots) + '</g>'
 
-# logo from the original mockup (hub icon), rounded mask
-src = cv2.imread('/home/user/agodwin12/fleetra-analytics/work/orig.png')
-ic = src[423:490, 618:685]
-ic = cv2.resize(ic, (146, 146), interpolation=cv2.INTER_CUBIC)
+# official Fleetra logo asset (fleetra-analytics/assets/fleetra-logo.png), downsized for embedding
 import numpy as np
-mask = np.zeros(ic.shape[:2], np.uint8)
-r = 29
-cv2.rectangle(mask, (r, 0), (145 - r, 145), 255, -1); cv2.rectangle(mask, (0, r), (145, 145 - r), 255, -1)
-for cx, cy in [(r, r), (145 - r, r), (r, 145 - r), (145 - r, 145 - r)]:
-    cv2.circle(mask, (cx, cy), r, 255, -1)
-mask = cv2.GaussianBlur(mask, (0, 0), 0.8)
-rgba = np.dstack([ic, mask])
-ok, buf = cv2.imencode('.png', rgba)
+logo = cv2.imread('/home/user/agodwin12/fleetra-analytics/assets/fleetra-logo.png', cv2.IMREAD_UNCHANGED)
+logo = cv2.resize(logo, (248, 248), interpolation=cv2.INTER_AREA)
+ok, buf = cv2.imencode('.png', logo)
 body = body.replace('@@LOGO@@', base64.b64encode(buf.tobytes()).decode())
 
 html = f'''<!doctype html>

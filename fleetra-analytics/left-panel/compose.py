@@ -23,7 +23,7 @@ for x in range(SEP_X1, CLEAN_X1):
     full[:, x] = right_bg.astype(np.uint8)
 full[:, SEP_X0:SEP_X1] = SEP_BGR.astype(np.uint8)
 
-cv2.imwrite('../fleetra-login-final-v4.png', full)
+cv2.imwrite('../fleetra-login-final-v5.png', full)
 
 ref = cv2.imread('../fleetra-image-complete-v2.png')
 print('form area identical (x >= %d):' % CLEAN_X1, np.array_equal(ref[:, CLEAN_X1:], full[:, CLEAN_X1:]))
