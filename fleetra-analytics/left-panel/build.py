@@ -84,9 +84,9 @@ out.append(source_card('src-tracking', *SRC2, CYAN, 'Tracking',
 
 # ---------- hub ----------
 HX0, HX1, HY0, HY1 = 504, 680, CY - 88, CY + 88
-out.append(f'<g id="hub" class="hub">')
+out.append(f'<g id="hub" class="hub" data-phase="2">')
 out.append(f'<circle cx="592" cy="{CY}" r="170" fill="url(#hubGlow)"/>')
-out.append(f'<rect x="{HX0-14}" y="{HY0-14}" width="{HX1-HX0+28}" height="{HY1-HY0+28}" rx="30" fill="none" stroke="{ORANGE}" stroke-opacity=".22" stroke-width="1" stroke-dasharray="3 6" id="hub-ring"/>')
+out.append(f'<rect x="{HX0-14}" y="{HY0-14}" width="{HX1-HX0+28}" height="{HY1-HY0+28}" rx="30" fill="none" stroke="{ORANGE}" stroke-opacity=".22" stroke-width="1" stroke-dasharray="3 6" id="hub-ring" data-phase="3"/>')
 out.append(f'<rect x="{HX0}" y="{HY0}" width="{HX1-HX0}" height="{HY1-HY0}" rx="22" fill="{CARD}" stroke="{ORANGE}" stroke-opacity=".85" stroke-width="1.5"/>')
 out.append(f'<image href="data:image/png;base64,@@LOGO@@" x="{592-31}" y="{CY-66}" width="62" height="62"/>')
 out.append(text(592, CY + 38, 'Fleetra', 22, TXT, 700, 'middle'))
@@ -98,7 +98,7 @@ out.append(text(592, HY1 + 52, 'Centralise · Croise · Transforme', 13, MUTED, 
 OUTS = [
     ('out-finance', 'Finance', ['Suivi des performances', 'financières'], 'bars', ORANGE),
     ('out-performance', 'Performance', ['Analyse de la flotte', 'et des indicateurs'], 'pie', ORANGE),
-    ('out-operations', 'Opérations', ['Analyse de l\'activité et du', 'comportement des véhicules'], 'activity', ORANGE),
+    ('out-operations', 'Opérations', ['Analyse de l\'activité et du', 'comportement des véhicules'], 'activity', CYAN),
     ('out-decision', 'Décision', ['Des données fiables pour', 'de meilleures décisions'], 'check', ORANGE),
 ]
 OX, OW, OH, GAP = 860, 266, 100, 20
@@ -133,10 +133,12 @@ for (idn, *_), py, cy_, (_, _, _, _, col) in zip(OUTS, ports, centers, OUTS):
 lines, dots, nodes = [], [], []
 for idn, (p0, c1, c2, p3), col in conns:
     d = f'M{p0[0]},{p0[1]} C{c1[0]},{c1[1]} {c2[0]},{c2[1]} {p3[0]},{p3[1]}'
-    lines.append(f'<path id="{idn}" class="flow" d="{d}" fill="none" stroke="{col}" stroke-opacity=".6" stroke-width="1.4" stroke-linecap="round"/>')
+    phase = 1 if idn.startswith('flow-in') else 4
+    fam = 'operational' if col == CYAN else 'financial'
+    lines.append(f'<path id="{idn}" class="flow" data-phase="{phase}" data-family="{fam}" d="{d}" fill="none" stroke="{col}" stroke-opacity=".6" stroke-width="1.4" stroke-linecap="round"/>')
     for t in (0.3, 0.7):
         x, y = bez(p0, c1, c2, p3, t)
-        dots.append(f'<g class="dot" data-flow="{idn}"><circle cx="{x:.1f}" cy="{y:.1f}" r="7" fill="{col}" opacity=".16"/><circle cx="{x:.1f}" cy="{y:.1f}" r="2.6" fill="{col}"/></g>')
+        dots.append(f'<g class="dot" data-flow="{idn}" data-phase="{phase}" data-family="{fam}"><circle cx="{x:.1f}" cy="{y:.1f}" r="7" fill="{col}" opacity=".16"/><circle cx="{x:.1f}" cy="{y:.1f}" r="2.6" fill="{col}"/></g>')
     x, y = p0
     nodes.append(f'<circle class="port" cx="{x}" cy="{y}" r="3.6" fill="{BG}" stroke="{col}" stroke-width="1.5"/>')
     x, y = p3
