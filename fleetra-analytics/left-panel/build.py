@@ -89,9 +89,10 @@ out.append(f'<g id="hub" class="hub" data-phase="2">')
 # soft light *behind* the block (diffuse, no hard shadow); the opaque card hides it inside, so it only spills around the edges
 out.append(f'<g id="hub-halo" opacity=".55"><rect x="{HX0+6}" y="{HY0+6}" width="{HX1-HX0-12}" height="{HY1-HY0-12}" rx="26" fill="{ORANGE}" fill-opacity=".55" filter="url(#hubBlur)"/>'
            f'<rect x="{HX0-10}" y="{HY0-10}" width="{HX1-HX0+20}" height="{HY1-HY0+20}" rx="34" fill="#ff8a4c" fill-opacity=".10" filter="url(#hubBlurWide)"/></g>')
-out.append(f'<rect x="{HX0}" y="{HY0}" width="{HX1-HX0}" height="{HY1-HY0}" rx="22" fill="{CARD}" stroke="{ORANGE}" stroke-opacity=".9" stroke-width="1.25" id="hub-frame"/>')
-LOGO = 80
-out.append(f'<image id="hub-logo" href="data:image/png;base64,@@LOGO@@" x="{591-LOGO/2}" y="{CY-LOGO/2}" width="{LOGO}" height="{LOGO}"/>')
+# the hub IS the Fleetra logo tile (it fills the whole square), with a fine light edge on top
+LOGO = HX1 - HX0
+out.append(f'<image id="hub-logo" href="data:image/png;base64,@@LOGO@@" x="{HX0}" y="{HY0}" width="{LOGO}" height="{LOGO}"/>')
+out.append(f'<rect x="{HX0+0.5}" y="{HY0+0.5}" width="{HX1-HX0-1}" height="{HY1-HY0-1}" rx="40" fill="none" stroke="#ffffff" stroke-opacity=".14" stroke-width="1" id="hub-frame"/>')
 out.append('</g>')
 out.append(text(591, HY1 + 52, 'Centralise · Croise · Transforme', 13, MUTED, 500, 'middle', .4, 'hub-caption'))
 
@@ -154,7 +155,7 @@ body += '<g id="ports">' + ''.join(nodes) + '</g>' + '<g id="dots">' + ''.join(d
 # official Fleetra logo asset (fleetra-analytics/assets/fleetra-logo.png), downsized for embedding
 import numpy as np
 logo = cv2.imread('/home/user/agodwin12/fleetra-analytics/assets/fleetra-logo.png', cv2.IMREAD_UNCHANGED)
-logo = cv2.resize(logo, (320, 320), interpolation=cv2.INTER_AREA)
+logo = cv2.resize(logo, (512, 512), interpolation=cv2.INTER_AREA)
 ok, buf = cv2.imencode('.png', logo)
 body = body.replace('@@LOGO@@', base64.b64encode(buf.tobytes()).decode())
 

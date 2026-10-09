@@ -38,7 +38,7 @@ function route(id, a, b, bend) {
   el("path", { id, d }, internal);
   return "#" + id;
 }
-const logoIn = { x: lx - 4, y: lcy }, logoOut = { x: lx + ls + 4, y: lcy };
+const logoIn = { x: lx + 22, y: lcy }, logoOut = { x: lx + ls - 22, y: lcy };
 const IN_ROUTE = {
   "flow-in-recouvrement": route("r-in-recouvrement", pathEnd("flow-in-recouvrement"), logoIn, 22),
   "flow-in-tracking": route("r-in-tracking", pathEnd("flow-in-tracking"), logoIn, 22),
@@ -118,14 +118,14 @@ const IN_DUR = 1.4;
 });
 
 /* ---------- PHASE 4 — centralise · croise · transforme ---------- */
-tl.to(frame, { attr: { "stroke-width": 1.8, "stroke-opacity": 1 }, duration: 0.5, ease: "sine.out" }, 2.0);
-tl.to(frame, { attr: { "stroke-width": 1.25, "stroke-opacity": 0.9 }, duration: 0.9, ease: "sine.inOut" }, 4.6);
+tl.to(frame, { attr: { "stroke-opacity": 0.42 }, duration: 0.5, ease: "sine.out" }, 2.0);
+tl.to(frame, { attr: { "stroke-opacity": 0.14 }, duration: 0.9, ease: "sine.inOut" }, 4.6);
 tl.to(halo, { opacity: 1, duration: 1.0, ease: "sine.out" }, 2.2);
 tl.to(halo, { opacity: 0.55, duration: 1.4, ease: "sine.inOut" }, 4.3);
 tl.to(logoGlow, { opacity: 0.45, duration: 0.7, ease: "sine.out" }, 2.9);
 tl.to(logoGlow, { opacity: 0, duration: 1.0, ease: "sine.inOut" }, 4.0);
-tl.to(logo, { scale: 1.04, transformOrigin: "50% 50%", duration: 0.6, ease: "sine.out" }, 3.0);
-tl.to(logo, { scale: 1, transformOrigin: "50% 50%", duration: 0.9, ease: "sine.inOut" }, 3.6);
+tl.to(logo, { filter: "brightness(1.12)", duration: 0.6, ease: "sine.out" }, 3.0);
+tl.to(logo, { filter: "brightness(1)", duration: 0.9, ease: "sine.inOut" }, 3.6);
 
 /* caption words light up in sequence */
 [["#w1", 3.1], ["#w2", 3.5], ["#w3", 3.9]].forEach(([w, t]) => {
